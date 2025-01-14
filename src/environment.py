@@ -1,29 +1,27 @@
-from behave.model_core import Status
-import allure
-from selenium.webdriver.remote.webdriver import WebDriver
+import datetime
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import os
 
 def before_all(context):
-    pass
-
-def after_step(context, step):
-    if hasattr(context, 'driver'):
-        # Capture screenshot if step failed
-        if step.status == Status.failed:
-            allure.attach(
-                context.driver.get_screenshot_as_png(),
-                name='screenshot',
-                attachment_type=allure.attachment_type.PNG
-            )
+    # Create reports directory if it doesn't exist
+    if not os.path.exists("reports"):
+        os.makedirs("reports")
 
 def after_scenario(context, scenario):
     if hasattr(context, 'driver'):
-        # Capture screenshot after each scenario
-        allure.attach(
-            context.driver.get_screenshot_as_png(),
-            name='screenshot',
-            attachment_type=allure.attachment_type.PNG
-        )
-        context.driver.quit()
-        # Clean up after each scenario
-        if hasattr(context, 'driver'):
+        try:
             context.driver.quit()
+        except:
+            pass
+
+def after_step(context, step):
+    if step.status == "failed" and hasattr(context, 'driver'):
+        # Take screenshot on failure
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        screenshot_path = f"reports/screenshot-{timestamp}.png"
+        try:
+            context.driver.save_screenshot(screenshot_path)
+            print(f"Screenshot saved: {screenshot_path}")
+        except:
+            print("Failed to take screenshot")

@@ -1,3 +1,4 @@
+import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,20 +21,34 @@ class ProductsPage(BasePage):
     def get_product_prices(self):
         """Get list of product prices"""
         try:
-            # Wait for prices to be visible
-            self.wait.until(
+            prices = []
+            elements = self.wait.until(
                 EC.presence_of_all_elements_located((By.CLASS_NAME, "inventory_item_price"))
             )
-            prices = self.driver.find_elements(By.CLASS_NAME, "inventory_item_price")
-            return [float(price.text.replace("$", "")) for price in prices]
+            for element in elements:
+                price_text = element.text.replace("$", "").strip()
+                try:
+                    prices.append(float(price_text))
+                except ValueError as e:
+                    print(f"Error converting price {price_text}: {str(e)}")
+            return prices
         except Exception as e:
             print(f"Error getting product prices: {str(e)}")
             return []
     
     def add_product_to_cart(self, product_name):
         """Add a product to cart by its name"""
-        button = self._get_add_to_cart_button(product_name)
-        button.click()
+        try:
+            container = self._get_product_container(product_name)
+            button = container.find_element(By.CSS_SELECTOR, "button")
+            if "add-to-cart" in button.get_attribute("id").lower():
+                button.click()
+                time.sleep(0.5)  # Small wait for button state change
+            else:
+                print(f"Product {product_name} might already be in cart")
+        except Exception as e:
+            print(f"Error adding product {product_name} to cart: {str(e)}")
+            raise
     
     def remove_product_from_cart(self, product_name):
         """Remove a product from cart by its name"""
@@ -56,13 +71,12 @@ class ProductsPage(BasePage):
     
     def _get_product_container(self, product_name):
         """Get product container element by product name"""
-        return self.wait.until(
-            EC.presence_of_element_located((
-                By.XPATH, 
-                f"//div[contains(@class, 'inventory_item')]//div[text()='{product_name}']/ancestor::div[contains(@class, 'inventory_item')]"
-            ))
+        locator = (
+            By.XPATH,
+            f"//div[contains(@class, 'inventory_item_name') and text()='{product_name}']/ancestor::div[contains(@class, 'inventory_item')]"
         )
-    
+        return self.wait.until(EC.presence_of_element_located(locator))
+        
     def _get_add_to_cart_button(self, product_name):
         """Get add to cart button for a product"""
         container = self._get_product_container(product_name)
