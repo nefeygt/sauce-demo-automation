@@ -22,7 +22,8 @@ Feature: Product Page Functionality
         And the "Sauce Labs Bike Light" should show "Remove" button
 
     Scenario: Remove item from cart
-        Given I have added "Sauce Labs Backpack" to the cart
+        Given I am logged in as a standard user
+        And I add "Sauce Labs Backpack" to the cart
         When I remove "Sauce Labs Backpack" from the cart
         Then the cart count should be "0"
         And the "Sauce Labs Backpack" should show "Add to cart" button

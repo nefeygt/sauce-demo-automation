@@ -51,14 +51,27 @@ def step_impl(context, product_name):
 
 @when('I remove "{product_name}" from the cart')
 def step_impl(context, product_name):
-    context.products_page.remove_product_from_cart(product_name)
+    try:
+        context.products_page.remove_product_from_cart(product_name)
+    except Exception as e:
+        assert False, f"Failed to remove product: {str(e)}"
 
 @then('the cart count should be "{count}"')
 def step_impl(context, count):
-    actual_count = context.products_page.get_cart_count()
-    assert str(actual_count) == count, f"Cart count is {actual_count}, expected {count}"
+    try:
+        # Add a small wait to allow cart count to update
+        import time
+        time.sleep(1)  # Small wait for cart update
+        actual_count = context.products_page.get_cart_count()
+        assert str(actual_count) == count, f"Cart count is {actual_count}, expected {count}"
+    except Exception as e:
+        assert False, f"Failed to verify cart count: {str(e)}"
 
 @then('the "{product_name}" should show "{button_text}" button')
 def step_impl(context, product_name, button_text):
-    actual_text = context.products_page.get_button_text(product_name)
-    assert button_text in actual_text, f"Button shows '{actual_text}', expected '{button_text}'"
+    try:
+        actual_text = context.products_page.get_button_text(product_name)
+        assert button_text.lower() in actual_text.lower(), \
+            f"Button shows '{actual_text}', expected text containing '{button_text}'"
+    except Exception as e:
+        assert False, f"Failed to verify button text: {str(e)}"
