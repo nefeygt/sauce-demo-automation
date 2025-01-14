@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
+import os
 
 @given('I am on the login page')
 def step_impl(context):
@@ -11,6 +12,11 @@ def step_impl(context):
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
+    
+    # Run headless in CI environment
+    if os.getenv('CI'):
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
     
     # Initialize WebDriver
     context.driver = webdriver.Chrome(options=chrome_options)
