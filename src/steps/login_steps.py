@@ -6,16 +6,14 @@ from pages.products_page import ProductsPage
 
 @given('I am on the login page')
 def step_impl(context):
-    context.logger.info("Setting up Chrome options")
+    # Set up Chrome options
     chrome_options = Options()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--window-size=1920,1080")
     
-    context.logger.info("Initializing WebDriver")
+    # Initialize WebDriver
     context.driver = webdriver.Chrome(options=chrome_options)
-    context.driver.logger = context.logger  # Pass logger to driver
-    
     context.login_page = LoginPage(context.driver)
     context.login_page.navigate()
 
