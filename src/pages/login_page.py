@@ -14,17 +14,23 @@ class LoginPage(BasePage):
 
     def navigate(self):
         """Navigate to login page"""
+        self.logger.info(f"Navigating to {self.url}")
         self.driver.get(self.url)
+        self.logger.info("Successfully loaded login page")
 
     def login(self, username, password):
         """Perform login with given credentials"""
+        self.logger.info(f"Attempting login with username: {username}")
         self.input_text(*self.USERNAME_INPUT, username)
         self.input_text(*self.PASSWORD_INPUT, password)
         self.click(*self.LOGIN_BUTTON)
+        self.logger.info("Login attempt completed")
 
     def get_error_message(self):
         """Get error message text if present"""
-        return self.get_text(*self.ERROR_MESSAGE)
+        error_message = self.get_text(*self.ERROR_MESSAGE)
+        self.logger.info(f"Error message displayed: {error_message}")
+        return error_message
 
     def is_on_login_page(self):
         """Verify if we're on login page"""
