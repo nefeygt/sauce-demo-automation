@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
+import os
 
 @given('I am on the login page')
 def step_impl(context):
@@ -15,19 +16,28 @@ def step_impl(context):
     chrome_options.add_argument("--window-size=1920,1080")
     
     try:
-        # Initialize WebDriver with options
-        service = Service(ChromeDriverManager().install())
+        # Get the driver path
+        driver_path = ChromeDriverManager().install()
+        
+        # Create service object
+        service = Service(executable_path=driver_path)
+        
+        # Print for debugging
+        print(f"Driver path: {driver_path}")
+        print(f"Driver path exists: {os.path.exists(driver_path)}")
+        
+        # Initialize WebDriver with explicit service and options
         context.driver = webdriver.Chrome(
-            service=service,
-            options=chrome_options
+            options=chrome_options,
+            service=service
         )
+        
         context.login_page = LoginPage(context.driver)
         context.login_page.navigate()
     except Exception as e:
         print(f"Failed to initialize WebDriver: {str(e)}")
+        print(f"Exception type: {type(e)}")
         raise
-
-# Rest of the code remains the same...
 
 @when('I login with "{username}" and "{password}"')
 def step_impl(context, username, password):
@@ -42,7 +52,3 @@ def step_impl(context):
 def step_impl(context):
     error_message = context.login_page.get_error_message()
     assert error_message != "", "No error message displayed"
-
-def after_scenario(context, scenario):
-    if hasattr(context, 'driver'):
-        context.driver.quit()
