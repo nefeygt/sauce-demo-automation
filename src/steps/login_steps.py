@@ -2,7 +2,6 @@ from behave import given, when, then
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
 import os
@@ -16,27 +15,15 @@ def step_impl(context):
     chrome_options.add_argument("--window-size=1920,1080")
     
     try:
-        # Get the driver path
-        driver_path = ChromeDriverManager().install()
-        
-        # Create service object
-        service = Service(executable_path=driver_path)
-        
-        # Print for debugging
-        print(f"Driver path: {driver_path}")
-        print(f"Driver path exists: {os.path.exists(driver_path)}")
-        
-        # Initialize WebDriver with explicit service and options
+        # Using direct ChromeDriver path
+        service = Service()
         context.driver = webdriver.Chrome(
-            options=chrome_options,
-            service=service
+            options=chrome_options
         )
-        
         context.login_page = LoginPage(context.driver)
         context.login_page.navigate()
     except Exception as e:
         print(f"Failed to initialize WebDriver: {str(e)}")
-        print(f"Exception type: {type(e)}")
         raise
 
 @when('I login with "{username}" and "{password}"')
