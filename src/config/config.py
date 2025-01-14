@@ -57,9 +57,9 @@ class Locators:
     LOGIN_ERROR = (By.CSS_SELECTOR, "[data-test='error']")
     
     # Products Page
-    PRODUCT_TITLE = (By.CLASS_NAME, "title")
-    PRODUCTS_LIST = (By.CLASS_NAME, "inventory_item")
     SORT_DROPDOWN = (By.CLASS_NAME, "product_sort_container")
+    PRODUCT_ITEM = (By.CLASS_NAME, "inventory_item")
+    PRODUCT_PRICE = (By.CLASS_NAME, "inventory_item_price")
     CART_BADGE = (By.CLASS_NAME, "shopping_cart_badge")
     
     # Product Item

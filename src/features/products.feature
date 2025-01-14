@@ -3,18 +3,18 @@ Feature: Product Page Functionality
     I want to be able to sort products and add them to cart
     So that I can easily find and purchase items
 
-    Background:
-        Given I am logged in as a standard user
-
     Scenario: Sort products by price low to high
+        Given I am logged in as a standard user
         When I sort products by "Price (low to high)"
         Then products should be sorted by price in ascending order
 
     Scenario: Sort products by price high to low
+        Given I am logged in as a standard user
         When I sort products by "Price (high to low)"
         Then products should be sorted by price in descending order
 
     Scenario: Add multiple items to cart
+        Given I am logged in as a standard user
         When I add "Sauce Labs Backpack" to the cart
         And I add "Sauce Labs Bike Light" to the cart
         Then the cart count should be "2"
