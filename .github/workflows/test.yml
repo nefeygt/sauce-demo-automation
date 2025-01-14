@@ -7,12 +7,13 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 jobs:
   test:
+    name: Run Tests and Generate Report
     runs-on: ubuntu-latest
     
     steps:
@@ -40,27 +41,24 @@ jobs:
         cd src
         behave -f allure_behave.formatter:AllureFormatter -o ../reports/allure-results ./features
 
-    - name: Get Allure history
-      uses: actions/checkout@v3
-      if: always()
-      continue-on-error: true
-      with:
-        ref: gh-pages
-        path: gh-pages
+    - name: Setup Pages
+      uses: actions/configure-pages@v2
 
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
       if: always()
+      id: allure-report
       with:
         allure_results: reports/allure-results
-        gh_pages: gh-pages
         allure_report: allure-report
-        allure_history: allure-history
 
-    - name: Deploy report to Github Pages
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
       if: always()
-      uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: allure-history
+        path: allure-report
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      if: always()
+      uses: actions/deploy-pages@v1
