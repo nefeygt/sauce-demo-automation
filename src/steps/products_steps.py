@@ -1,74 +1,63 @@
 from behave import given, when, then
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from pages.login_page import LoginPage
 from pages.products_page import ProductsPage
-from config import TestConfig
-import time
+from pages.login_page import LoginPage
 
-def setup_driver():
-    chrome_options = Options()
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1920,1080")
-    return webdriver.Chrome(options=chrome_options)
-
-@given('I am logged in as a standard user')
-def step_impl(context):
-    context.driver = setup_driver()
+@given('I am logged in as "{username}"')
+def step_impl(context, username):
     login_page = LoginPage(context.driver)
-    login_page.navigate()
-    time.sleep(1)  # Wait for page load
-    
-    # Login with standard user
-    login_page.login(
-        TestConfig.TEST_USERS["standard"]["username"],
-        TestConfig.TEST_USERS["standard"]["password"]
-    )
-    time.sleep(1)  # Wait for login
-    
-    # Initialize and verify products page
-    context.products_page = ProductsPage(context.driver)
-    assert context.products_page.is_on_products_page(), "Failed to reach products page"
+    login_page.login(username, "secret_sauce")
 
-@when('I sort products by "{sort_option}"')
-def step_impl(context, sort_option):
-    context.products_page.sort_products(sort_option)
-    time.sleep(2)  # Wait for sorting to complete
+@given('I am on the products page')
+def step_impl(context):
+    context.products_page = ProductsPage(context.driver)
+    assert context.products_page.is_current_page()
+
+@when('I select sorting option "{option}"')
+def step_impl(context, option):
+    context.products_page.select_sort_option(option)
 
 @then('products should be sorted by price in ascending order')
 def step_impl(context):
-    time.sleep(1)
     prices = context.products_page.get_product_prices()
-    sorted_prices = sorted(prices)
-    assert prices == sorted_prices, f"Products not sorted correctly. Current: {prices}, Expected: {sorted_prices}"
+    assert prices == sorted(prices), f"Prices not in ascending order. Current order: {prices}"
 
 @then('products should be sorted by price in descending order')
 def step_impl(context):
-    time.sleep(1)
     prices = context.products_page.get_product_prices()
-    sorted_prices = sorted(prices, reverse=True)
-    assert prices == sorted_prices, f"Products not sorted correctly. Current: {prices}, Expected: {sorted_prices}"
+    assert prices == sorted(prices, reverse=True), f"Prices not in descending order. Current order: {prices}"
 
-@when('I add "{product_name}" to the cart')
-def step_impl(context, product_name):
-    context.products_page.add_product_to_cart(product_name)
-    time.sleep(1)
+@then('products should be sorted by name in ascending order')
+def step_impl(context):
+    names = context.products_page.get_product_names()
+    assert names == sorted(names), f"Names not in ascending order. Current order: {names}"
 
-@when('I remove "{product_name}" from the cart')
-def step_impl(context, product_name):
-    context.products_page.remove_product_from_cart(product_name)
-    time.sleep(1)
+@then('products should be sorted by name in descending order')
+def step_impl(context):
+    names = context.products_page.get_product_names()
+    assert names == sorted(names, reverse=True), f"Names not in descending order. Current order: {names}"
 
-@then('the cart count should be "{count}"')
+@when('I add the item "{item_name}" to cart')
+def step_impl(context, item_name):
+    context.products_page.add_item_to_cart(item_name)
+
+@given('I have added "{item_name}" to cart')
+def step_impl(context, item_name):
+    context.products_page.add_item_to_cart(item_name)
+
+@when('I remove the item "{item_name}" from cart')
+def step_impl(context, item_name):
+    context.products_page.remove_item_from_cart(item_name)
+
+@then('the shopping cart badge should show "{count}"')
 def step_impl(context, count):
-    time.sleep(1)
-    actual_count = context.products_page.get_cart_count()
-    assert str(actual_count) == count, f"Cart count is {actual_count}, expected {count}"
+    actual_count = context.products_page.get_cart_badge_count()
+    assert actual_count == int(count), f"Expected cart count: {count}, but got: {actual_count}"
 
-@then('the "{product_name}" should show "{button_text}" button')
-def step_impl(context, product_name, button_text):
-    time.sleep(1)
-    actual_text = context.products_page.get_button_text(product_name)
-    assert button_text.lower() in actual_text.lower(), \
-        f"Button shows '{actual_text}', expected text containing '{button_text}'"
+@then('the shopping cart badge should not be visible')
+def step_impl(context):
+    assert not context.products_page.is_cart_badge_visible(), "Cart badge is visible when it should not be"
+
+@then('the item "{item_name}" should have "{button_text}" button')
+def step_impl(context, item_name, button_text):
+    actual_text = context.products_page.get_item_button_text(item_name)
+    assert button_text in actual_text, f"Expected button text to contain '{button_text}', but got '{actual_text}'"
