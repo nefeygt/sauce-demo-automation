@@ -10,22 +10,17 @@ class LoginPage(BasePage):
 
     def __init__(self, driver):
         super().__init__(driver)
-        self.url = "https://www.saucedemo.com/"
-
-    def navigate(self):
-        """Navigate to login page"""
-        self.driver.get(self.url)
 
     def login(self, username, password):
-        """Perform login with given credentials"""
+        """Login with the given credentials"""
         self.input_text(*self.USERNAME_INPUT, username)
         self.input_text(*self.PASSWORD_INPUT, password)
-        self.click(*self.LOGIN_BUTTON)
+        self.click_element(*self.LOGIN_BUTTON)
 
     def get_error_message(self):
-        """Get error message text if present"""
+        """Get the error message text if present"""
         return self.get_text(*self.ERROR_MESSAGE)
 
-    def is_on_login_page(self):
-        """Verify if we're on login page"""
-        return self.is_element_visible(*self.LOGIN_BUTTON)
+    def is_error_message_displayed(self):
+        """Check if error message is displayed"""
+        return self.is_element_visible(*self.ERROR_MESSAGE)
