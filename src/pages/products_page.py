@@ -19,8 +19,16 @@ class ProductsPage(BasePage):
     
     def get_product_prices(self):
         """Get list of product prices"""
-        prices = self.driver.find_elements(By.CLASS_NAME, "inventory_item_price")
-        return [float(price.text.replace("$", "")) for price in prices]
+        try:
+            # Wait for prices to be visible
+            self.wait.until(
+                EC.presence_of_all_elements_located((By.CLASS_NAME, "inventory_item_price"))
+            )
+            prices = self.driver.find_elements(By.CLASS_NAME, "inventory_item_price")
+            return [float(price.text.replace("$", "")) for price in prices]
+        except Exception as e:
+            print(f"Error getting product prices: {str(e)}")
+            return []
     
     def add_product_to_cart(self, product_name):
         """Add a product to cart by its name"""
@@ -58,7 +66,11 @@ class ProductsPage(BasePage):
     def _get_add_to_cart_button(self, product_name):
         """Get add to cart button for a product"""
         container = self._get_product_container(product_name)
-        return container.find_element(By.CSS_SELECTOR, "button[id^='add-to-cart']")
+        return self.wait.until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, "button[id^='add-to-cart']")
+            )
+        )
     
     def _get_remove_button(self, product_name):
         """Get remove button for a product"""

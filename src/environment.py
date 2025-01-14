@@ -24,3 +24,6 @@ def after_scenario(context, scenario):
             attachment_type=allure.attachment_type.PNG
         )
         context.driver.quit()
+        # Clean up after each scenario
+        if hasattr(context, 'driver'):
+            context.driver.quit()
