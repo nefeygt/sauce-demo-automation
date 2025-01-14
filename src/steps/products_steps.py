@@ -1,9 +1,20 @@
 from behave import given, when, then
 from pages.products_page import ProductsPage
 from pages.login_page import LoginPage
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 @given('I am logged in as "{username}"')
 def step_impl(context, username):
+    # Navigate to the login page first
+    context.driver.get("https://www.saucedemo.com")
+    
+    # Wait for the login page to load
+    wait = WebDriverWait(context.driver, 10)
+    wait.until(EC.visibility_of_element_located((By.ID, "user-name")))
+    
+    # Initialize login page and perform login
     login_page = LoginPage(context.driver)
     login_page.login(username, "secret_sauce")
 
