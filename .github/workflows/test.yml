@@ -24,12 +24,13 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install Chrome
-      run: |
-        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-        sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
+    - name: Setup Chrome and ChromeDriver
+      uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: stable
+    
+    - name: Setup ChromeDriver
+      uses: nanasess/setup-chromedriver@v2
     
     - name: Install dependencies
       run: |
@@ -38,6 +39,14 @@ jobs:
         
     - name: Run tests with Allure
       run: |
+        # Start ChromeDriver
+        chromedriver --version
+        google-chrome --version
+        
+        # Start ChromeDriver in the background
+        chromedriver &
+        
+        # Run tests
         cd src
         behave -f allure_behave.formatter:AllureFormatter -o ../reports/allure-results ./features
 

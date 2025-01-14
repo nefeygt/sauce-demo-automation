@@ -4,18 +4,31 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import os
+import platform
 
 @given('I am on the login page')
 def step_impl(context):
-    # Setup Chrome options
     chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--start-maximized')
     
-    # Create Chrome service with path to chromedriver
-    service = Service('chromedriver.exe')  # Adjust this path if chromedriver is elsewhere
+    # Add CI-specific options
+    if os.getenv('CI'):
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+    else:
+        chrome_options.add_argument('--start-maximized')
     
-    # Initialize the driver with service and options
-    context.driver = webdriver.Chrome(service=service, options=chrome_options)
+    # Setup ChromeDriver based on environment
+    if os.getenv('CI'):
+        # In CI environment, ChromeDriver is started separately
+        context.driver = webdriver.Chrome(options=chrome_options)
+    else:
+        # Local environment with manual ChromeDriver
+        chromedriver_path = 'chromedriver.exe' if platform.system() == 'Windows' else 'chromedriver'
+        service = Service(chromedriver_path)
+        context.driver = webdriver.Chrome(service=service, options=chrome_options)
+    
     context.driver.get("https://www.saucedemo.com")
     
     # Wait for the login form to be present
